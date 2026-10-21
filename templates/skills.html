@@ -1,0 +1,161 @@
+{% extends "app_layout.html" %}
+{% block title %}My Skills{% endblock %}
+{% block page_title %}My Skills{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>My Skills</h1>
+    <p>Add, edit, and manage the skills you offer to other students.</p>
+  </div>
+  <button class="btn btn-primary" onclick="openModal('addSkillModal')">+ Add New Skill</button>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+    <div class="alert alert-{{ cat }}">{{ msg }}<button class="alert-close">×</button></div>
+  {% endfor %}
+{% endwith %}
+
+<div class="card">
+  {% if skills %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>Category</th>
+            <th>Level</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sk in skills %}
+          <tr>
+            <td style="font-weight:600;color:var(--navy)">{{ sk.skill_name }}</td>
+            <td>
+              <span class="badge" style="background:var(--teal-faded);color:var(--teal)">
+                {{ sk.category }}
+              </span>
+            </td>
+            <td><span class="badge badge-{{ sk.proficiency_level | lower }}">{{ sk.proficiency_level }}</span></td>
+            <td style="color:var(--gray-600);max-width:260px;font-size:13.5px">
+              {{ sk.description[:80] if sk.description else '—' }}{% if sk.description and sk.description|length > 80 %}…{% endif %}
+            </td>
+            <td>
+              <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+                <button class="btn btn-outline btn-sm" data-edit-skill="{{ sk.id }}">✏️ Edit</button>
+                <form method="POST" action="{{ url_for('delete_skill', skill_id=sk.id) }}"
+                      data-confirm="Delete '{{ sk.skill_name }}'? This will also remove associated requests.">
+                  <button type="submit" class="btn btn-danger-outline btn-sm">🗑 Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state" style="padding:3.5rem">
+      <div class="empty-icon">🎓</div>
+      <h3>No skills added yet</h3>
+      <p>Start by adding a skill you can teach to other students.</p>
+      <button class="btn btn-primary" style="margin-top:1rem" onclick="openModal('addSkillModal')">+ Add Your First Skill</button>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Add Skill Modal -->
+<div class="modal-backdrop" id="addSkillModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New Skill</h3>
+      <button class="modal-close" onclick="closeModal('addSkillModal')">×</button>
+    </div>
+    <form method="POST" action="{{ url_for('add_skill') }}" data-loading>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Skill Name *</label>
+          <input class="form-control" name="skill_name" placeholder="e.g. Python Programming" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select class="form-control" name="category" required>
+              <option value="">Select category</option>
+              {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Proficiency Level *</label>
+            <select class="form-control" name="proficiency_level" required>
+              <option value="">Select level</option>
+              {% for lvl in levels %}
+                <option value="{{ lvl }}">{{ lvl }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" name="description" rows="3"
+                    placeholder="Briefly describe what you can teach…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('addSkillModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Skill</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Skill Modal -->
+<div class="modal-backdrop" id="editSkillModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Skill</h3>
+      <button class="modal-close" onclick="closeModal('editSkillModal')">×</button>
+    </div>
+    <form method="POST" action="" data-loading>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Skill Name *</label>
+          <input class="form-control" name="skill_name" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select class="form-control" name="category" required>
+              {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Proficiency Level *</label>
+            <select class="form-control" name="proficiency_level" required>
+              {% for lvl in levels %}
+                <option value="{{ lvl }}">{{ lvl }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" name="description" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('editSkillModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

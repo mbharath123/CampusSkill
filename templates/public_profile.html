@@ -1,0 +1,104 @@
+{% extends "app_layout.html" %}
+{% block title %}Public Profile{% endblock %}
+{% block page_title %}Student Profile{% endblock %}
+
+{% block content %}
+<div class="profile-header-card">
+  <div class="profile-avatar">{{ student.full_name[0].upper() }}</div>
+  <div class="profile-info">
+    <h2>{{ student.full_name }}</h2>
+    <div class="dept">{{ student.department }}</div>
+    <div class="profile-meta">
+      <div class="profile-meta-item">🎓 {{ student.academic_year }}</div>
+      <div class="profile-meta-item">⭐ {{ avg_rating if avg_rating else '—' }} ({{ review_count }} reviews)</div>
+    </div>
+    {% if student.bio %}
+    <p style="margin-top:.75rem;color:rgba(255,255,255,.8);font-size:14px;max-width:550px">{{ student.bio }}</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <div class="card-header"><h3>Skills Offered</h3></div>
+    <div class="card-body">
+      {% if skills %}
+        <div style="display:flex;flex-direction:column;gap:.75rem">
+          {% for sk in skills %}
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.8rem;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-200)">
+            <div>
+              <div style="font-weight:600;color:var(--navy)">{{ sk.skill_name }}</div>
+              <div style="font-size:12.5px;color:var(--gray-500)">{{ sk.category }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.6rem">
+              <span class="badge badge-{{ sk.proficiency_level | lower }}">{{ sk.proficiency_level }}</span>
+              {% if student.id != current_user.id %}
+              <button class="btn btn-primary btn-sm"
+                      data-request-btn
+                      data-skill-id="{{ sk.id }}"
+                      data-provider-id="{{ student.id }}">Request</button>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state"><div class="empty-icon">🎓</div><p>No skills listed yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Feedback & Ratings</h3></div>
+    {% if feedback_list %}
+      {% for fb in feedback_list %}
+      <div style="padding:.9rem 1.4rem;border-bottom:1px solid var(--gray-100)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.3rem">
+          <div class="stars">{% for i in range(1,6) %}{{ '★' if i<=fb.rating else '☆' }}{% endfor %}</div>
+          <span class="text-xs text-muted">{{ fb.session_date.strftime('%d %b %Y') if fb.session_date else '' }}</span>
+        </div>
+        <div style="font-size:13.5px;color:var(--gray-700)">{{ fb.comment or '<em>No written comment.</em>' }}</div>
+        <div style="font-size:12px;color:var(--gray-500);margin-top:.3rem">by {{ fb.learner_name }} · {{ fb.skill_name }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state"><div class="empty-icon">⭐</div><h3>No feedback yet</h3></div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Request modal -->
+{% if student.id != current_user.id %}
+<div class="modal-backdrop" id="requestModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Send Learning Request</h3>
+      <button class="modal-close" onclick="closeModal('requestModal')">×</button>
+    </div>
+    <form method="POST" action="{{ url_for('send_request') }}" data-loading>
+      <div class="modal-body">
+        <div style="background:var(--teal-faded);border-radius:10px;padding:1rem;margin-bottom:1.1rem">
+          <div style="font-weight:700;color:var(--navy)" id="modal-skill-name">Skill</div>
+          <div style="font-size:13px;color:var(--gray-600)">Provider: <strong id="modal-provider-name"></strong></div>
+          <div style="font-size:13px;color:var(--gray-600)">Level: <strong id="modal-level"></strong></div>
+        </div>
+        <input type="hidden" name="skill_id" />
+        <input type="hidden" name="provider_id" />
+        <div class="form-group">
+          <label class="form-label">Message to Provider</label>
+          <textarea class="form-control" name="message" rows="3" placeholder="Tell them what you want to learn…"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Preferred Session Time</label>
+          <input class="form-control" name="preferred_time" placeholder="e.g. Weekdays after 4 PM" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('requestModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Send Request</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

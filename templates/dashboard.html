@@ -1,0 +1,122 @@
+{% extends "app_layout.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Welcome back, {{ current_user.full_name.split()[0] }}! 👋</h1>
+    <p>Here's what's happening with your skills and sessions.</p>
+  </div>
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+    <a href="{{ url_for('skills') }}" class="btn btn-outline btn-sm">+ Add Skill</a>
+    <a href="{{ url_for('explore') }}" class="btn btn-primary btn-sm">🔍 Explore Skills</a>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-teal">🎓</div>
+    <div>
+      <div class="stat-value">{{ skills_count }}</div>
+      <div class="stat-label">Skills Offered</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-gold">📩</div>
+    <div>
+      <div class="stat-value">{{ pending_requests }}</div>
+      <div class="stat-label">Pending Requests</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-navy">📅</div>
+    <div>
+      <div class="stat-value">{{ upcoming_sessions }}</div>
+      <div class="stat-label">Upcoming Sessions</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-green">⭐</div>
+    <div>
+      <div class="stat-value">{{ avg_rating if avg_rating else '—' }}</div>
+      <div class="stat-label">Avg. Provider Rating</div>
+    </div>
+  </div>
+</div>
+
+<!-- Two-column grid -->
+<div class="two-col">
+
+  <!-- Recent Skills -->
+  <div class="card">
+    <div class="card-header">
+      <h3>My Recent Skills</h3>
+      <a href="{{ url_for('skills') }}" class="btn btn-outline btn-sm">Manage</a>
+    </div>
+    {% if recent_skills %}
+      {% for sk in recent_skills %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.4rem;border-bottom:1px solid var(--gray-100)">
+        <div>
+          <div style="font-weight:600;font-size:14px;color:var(--navy)">{{ sk.skill_name }}</div>
+          <div style="font-size:12.5px;color:var(--gray-500)">{{ sk.category }}</div>
+        </div>
+        <span class="badge badge-{{ sk.proficiency_level | lower }}">{{ sk.proficiency_level }}</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🎓</div>
+        <h3>No skills yet</h3>
+        <p>Add your first skill to start getting learning requests.</p>
+        <a href="{{ url_for('skills') }}" class="btn btn-primary btn-sm" style="margin-top:.75rem">+ Add Skill</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Recent Request Activity</h3>
+      <a href="{{ url_for('requests_page') }}" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    {% if recent_requests %}
+      {% for req in recent_requests %}
+      <div style="padding:.85rem 1.4rem;border-bottom:1px solid var(--gray-100)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.25rem">
+          <span style="font-weight:600;font-size:14px;color:var(--navy)">{{ req.skill_name }}</span>
+          <span class="badge badge-{{ req.status | lower }}">{{ req.status }}</span>
+        </div>
+        <div style="font-size:12.5px;color:var(--gray-500)">
+          {% if req.learner_id == current_user.id %}
+            Sent to {{ req.provider_name }}
+          {% else %}
+            From {{ req.learner_name }}
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📩</div>
+        <h3>No activity yet</h3>
+        <p>Explore skills and send your first learning request.</p>
+        <a href="{{ url_for('explore') }}" class="btn btn-primary btn-sm" style="margin-top:.75rem">Explore Skills</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card" style="margin-top:1.25rem">
+  <div class="card-header"><h3>Quick Actions</h3></div>
+  <div class="card-body" style="display:flex;gap:1rem;flex-wrap:wrap">
+    <a href="{{ url_for('skills') }}" class="btn btn-outline-navy">🎓 Manage My Skills</a>
+    <a href="{{ url_for('explore') }}" class="btn btn-outline-navy">🔍 Find a Skill Tutor</a>
+    <a href="{{ url_for('requests_page') }}" class="btn btn-outline-navy">📩 View Requests</a>
+    <a href="{{ url_for('sessions_page') }}" class="btn btn-outline-navy">📅 View Sessions</a>
+    <a href="{{ url_for('profile') }}" class="btn btn-outline-navy">👤 Edit Profile</a>
+  </div>
+</div>
+{% endblock %}

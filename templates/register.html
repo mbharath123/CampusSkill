@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Register – CampusSkill{% endblock %}
+{% block body %}
+<div class="auth-page">
+
+  <!-- Left branding panel -->
+  <div class="auth-panel auth-panel-left">
+    <div class="auth-branding">
+      <a href="{{ url_for('index') }}" class="nav-logo">
+        <div class="logo-mark">CS</div>
+        <span class="logo-text">Campus<span>Skill</span></span>
+      </a>
+      <h2>Join the campus learning community today.</h2>
+      <p>Create your free account and start sharing or discovering skills with students across your college.</p>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🎓</div>
+          <span>Add and showcase your skills to the community</span>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🔍</div>
+          <span>Discover and request sessions with peer tutors</span>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">⭐</div>
+          <span>Rate and review sessions to help others</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="auth-panel auth-form-panel">
+    <div class="auth-form-box">
+      <h1>Create your account</h1>
+      <p class="subtitle">Fill in your details to get started — it's free!</p>
+
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{ cat }}">{{ msg }}<button class="alert-close">×</button></div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('register') }}" data-loading>
+        <div class="form-group">
+          <label class="form-label" for="full_name">Full Name *</label>
+          <input class="form-control" type="text" id="full_name" name="full_name"
+                 value="{{ form_data.get('full_name','') }}" placeholder="e.g. Alice Johnson" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">College Email *</label>
+          <input class="form-control" type="email" id="email" name="email"
+                 value="{{ form_data.get('email','') }}" placeholder="you@college.edu" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password * <span class="text-muted text-xs">(min 6 chars)</span></label>
+          <input class="form-control" type="password" id="password" name="password"
+                 placeholder="Create a strong password" minlength="6" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="department">Department *</label>
+            <input class="form-control" type="text" id="department" name="department"
+                   value="{{ form_data.get('department','') }}" placeholder="e.g. Computer Science" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="academic_year">Academic Year *</label>
+            <select class="form-control" id="academic_year" name="academic_year" required>
+              <option value="">Select year</option>
+              {% for yr in ['1st Year','2nd Year','3rd Year','4th Year','Alumni'] %}
+                <option value="{{ yr }}" {{ 'selected' if form_data.get('academic_year')==yr }}>{{ yr }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:.5rem">
+          Create Account →
+        </button>
+      </form>
+
+      <div class="auth-footer-link">
+        Already have an account? <a href="{{ url_for('login') }}">Log In</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

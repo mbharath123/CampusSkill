@@ -1,0 +1,83 @@
+{% extends "app_layout.html" %}
+{% block title %}Submit Feedback{% endblock %}
+{% block page_title %}Submit Feedback{% endblock %}
+
+{% block content %}
+<div style="max-width:580px;margin:0 auto">
+  <div class="page-header" style="flex-direction:column;align-items:flex-start">
+    <a href="{{ url_for('sessions_page') }}" class="btn btn-outline btn-sm" style="margin-bottom:1rem">← Back to Sessions</a>
+    <div class="page-header-text">
+      <h1>Submit Feedback</h1>
+      <p>Rate your session and help others find great tutors.</p>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }}">{{ msg }}<button class="alert-close">×</button></div>
+    {% endfor %}
+  {% endwith %}
+
+  <!-- Session summary -->
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="card-body">
+      <div style="display:flex;align-items:center;gap:1rem">
+        <div style="width:50px;height:50px;background:var(--teal-faded);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎓</div>
+        <div>
+          <div style="font-weight:700;font-size:16px;color:var(--navy)">{{ sess.skill_name }}</div>
+          <div style="font-size:13.5px;color:var(--gray-500)">
+            Session with <strong>{{ sess.provider_name }}</strong>
+          </div>
+          <div style="font-size:13px;color:var(--gray-400);margin-top:.2rem">
+            {{ sess.session_date.strftime('%A, %d %B %Y') }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback form -->
+  <div class="card">
+    <div class="card-header"><h3>Your Feedback</h3></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('submit_feedback', session_id=sess.id) }}" data-loading>
+
+        <div class="form-group" style="text-align:center">
+          <label class="form-label" style="display:block;margin-bottom:1rem;font-size:15px">
+            How would you rate this session? *
+          </label>
+          <div class="star-rating" style="justify-content:center">
+            {% for i in [5,4,3,2,1] %}
+            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if i==5 %}required{% endif %} />
+            <label for="star{{ i }}" title="{{ i }} star{% if i>1 %}s{% endif %}">★</label>
+            {% endfor %}
+          </div>
+          <div id="rating-label" style="font-size:13px;color:var(--gray-500);margin-top:.75rem;height:1.2em"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Written Feedback (optional)</label>
+          <textarea class="form-control" name="comment" rows="4"
+                    placeholder="What did you learn? Was the provider helpful and clear? Would you recommend them?"></textarea>
+        </div>
+
+        <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1rem">
+          <a href="{{ url_for('sessions_page') }}" class="btn btn-outline">Cancel</a>
+          <button type="submit" class="btn btn-primary btn-lg">Submit Feedback →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const labels = {5:'Excellent – highly recommend!',4:'Good – would attend again.',3:'Average – decent session.',2:'Below average – needs improvement.',1:'Poor – not helpful.'};
+document.querySelectorAll('.star-rating input').forEach(input => {
+  input.addEventListener('change', () => {
+    document.getElementById('rating-label').textContent = labels[input.value] || '';
+  });
+});
+</script>
+{% endblock %}

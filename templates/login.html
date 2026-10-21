@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Log In – CampusSkill{% endblock %}
+{% block body %}
+<div class="auth-page">
+
+  <!-- Left branding panel -->
+  <div class="auth-panel auth-panel-left">
+    <div class="auth-branding">
+      <a href="{{ url_for('index') }}" class="nav-logo">
+        <div class="logo-mark">CS</div>
+        <span class="logo-text">Campus<span>Skill</span></span>
+      </a>
+      <h2>Welcome back to CampusSkill.</h2>
+      <p>Log in to continue managing your skills, sessions, and learning requests.</p>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <div class="auth-feature-icon">📅</div>
+          <span>View and manage your upcoming sessions</span>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">📩</div>
+          <span>Respond to incoming learning requests</span>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">📊</div>
+          <span>Track your ratings and feedback</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="auth-panel auth-form-panel">
+    <div class="auth-form-box">
+      <h1>Welcome back!</h1>
+      <p class="subtitle">Log in to your CampusSkill account.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{ cat }}">{{ msg }}<button class="alert-close">×</button></div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('login') }}" data-loading>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input class="form-control" type="email" id="email" name="email"
+                 placeholder="you@college.edu" required autofocus />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-control" type="password" id="password" name="password"
+                 placeholder="Your password" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:.5rem">
+          Log In →
+        </button>
+      </form>
+
+      <div class="auth-footer-link">
+        Don't have an account? <a href="{{ url_for('register') }}">Register free</a>
+      </div>
+
+      <div style="margin-top:1.5rem;padding:1rem;background:var(--teal-faded);border-radius:10px;font-size:13px;color:var(--gray-600)">
+        <strong>Demo accounts (password: Demo@1234):</strong><br>
+        alice@demo.campusskill · bob@demo.campusskill · carol@demo.campusskill
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+<!-- Reusable sidebar + topbar layout for all authenticated pages -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}CampusSkill{% endblock %} – CampusSkill</title>
+  <meta name="description" content="CampusSkill student dashboard" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="{{ url_for('index') }}" class="nav-logo">
+        <div class="logo-mark">CS</div>
+        <span class="logo-text">Campus<span>Skill</span></span>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a class="sidebar-link" href="{{ url_for('dashboard') }}">
+        <span class="icon">🏠</span> Dashboard
+      </a>
+      <a class="sidebar-link" href="{{ url_for('explore') }}">
+        <span class="icon">🔍</span> Explore Skills
+      </a>
+
+      <div class="sidebar-section-label">My Learning</div>
+      <a class="sidebar-link" href="{{ url_for('skills') }}">
+        <span class="icon">🎓</span> My Skills
+      </a>
+      <a class="sidebar-link" href="{{ url_for('requests_page') }}">
+        <span class="icon">📩</span> Requests
+      </a>
+      <a class="sidebar-link" href="{{ url_for('sessions_page') }}">
+        <span class="icon">📅</span> Sessions
+      </a>
+
+      <div class="sidebar-section-label">Account</div>
+      <a class="sidebar-link" href="{{ url_for('profile') }}">
+        <span class="icon">👤</span> My Profile
+      </a>
+      <a class="sidebar-link" href="{{ url_for('logout') }}" style="color:rgba(220,38,38,.8)">
+        <span class="icon">🚪</span> Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ current_user.full_name[0].upper() if current_user else '?' }}</div>
+        <div>
+          <div class="sidebar-user-name">{{ current_user.full_name if current_user else '' }}</div>
+          <div class="sidebar-user-email">{{ current_user.department if current_user else '' }}</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay"></div>
+
+  <!-- Main area -->
+  <div class="main-content">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <button class="hamburger" aria-label="Toggle menu">☰</button>
+        <span class="topbar-title">{% block page_title %}Dashboard{% endblock %}</span>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('explore') }}" class="btn btn-outline btn-sm">🔍 Explore</a>
+        <a href="{{ url_for('profile') }}" class="topbar-user" style="text-decoration:none">
+          <div class="topbar-avatar">{{ current_user.full_name[0].upper() if current_user else '?' }}</div>
+          <span class="topbar-username">{{ current_user.full_name.split()[0] if current_user else '' }}</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Flash messages -->
+    <div class="flash-container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{ cat }}">
+            <span>{{ '✓' if cat == 'success' else ('⚠' if cat == 'warning' else ('✕' if cat == 'danger' else 'ℹ')) }}</span>
+            {{ msg }}
+            <button class="alert-close" aria-label="Close">×</button>
+          </div>
+        {% endfor %}
+      {% endwith %}
+    </div>
+
+    <!-- Page content -->
+    <main class="page-content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

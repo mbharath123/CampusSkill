@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }} – CampusSkill{% endblock %}
+{% block body %}
+<div class="error-page">
+  <div class="error-code">{{ code }}</div>
+  <h2>{{ 'Page Not Found' if code==404 else ('Access Denied' if code==403 else 'Server Error') }}</h2>
+  <p>{{ message }}</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+    <a href="javascript:history.back()" class="btn btn-outline-navy">← Go Back</a>
+    <a href="{{ url_for('index') }}" class="btn btn-navy">🏠 Home</a>
+    {% if code != 403 %}
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Dashboard</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

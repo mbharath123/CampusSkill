@@ -1,0 +1,205 @@
+{% extends "app_layout.html" %}
+{% block title %}Learning Requests{% endblock %}
+{% block page_title %}Learning Requests{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Learning Requests</h1>
+    <p>Manage incoming requests from learners and track requests you've sent.</p>
+  </div>
+  <a href="{{ url_for('explore') }}" class="btn btn-primary">🔍 Find Skills to Learn</a>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for cat, msg in messages %}
+<div class="alert alert-{{ cat }}">{{ msg }}<button class="alert-close">×</button></div>
+{% endfor %}
+{% endwith %}
+
+<!-- Tabs -->
+<div class="tabs" data-tabs>
+  <button class="tab-btn active" data-tab="incoming">
+    Incoming
+    {% if incoming | selectattr('status','equalto','Pending') | list | length > 0 %}
+    <span class="notif-dot"></span>
+    {% endif %}
+  </button>
+  <button class="tab-btn" data-tab="sent">Sent</button>
+</div>
+
+<!-- INCOMING TAB -->
+<div class="tab-pane active" id="incoming">
+  <div class="card">
+    {% if incoming %}
+    {% for req in incoming %}
+    <div class="req-card">
+      <div class="req-card-header">
+        <div>
+          <span style="font-weight:700;color:var(--navy)">{{ req.skill_name }}</span>
+          <span style="color:var(--gray-400);margin:0 .4rem">·</span>
+          <span style="font-size:13.5px;color:var(--gray-600)">from
+            <a href="{{ url_for('public_profile', uid=req.learner_id) }}" style="font-weight:600">{{ req.learner_name
+              }}</a>
+            <span class="text-muted text-xs">({{ req.department }})</span>
+          </span>
+        </div>
+        <span class="badge badge-{{ req.status | lower }}">{{ req.status }}</span>
+      </div>
+
+      {% if req.message %}
+      <div class="req-card-body"
+        style="background:var(--gray-50);border-radius:8px;padding:.6rem .9rem;font-size:13.5px">
+        "{{ req.message }}"
+      </div>
+      {% endif %}
+
+      {% if req.preferred_time %}
+      <div style="font-size:13px;color:var(--gray-500)">⏰ Preferred time: {{ req.preferred_time }}</div>
+      {% endif %}
+
+      <div style="font-size:12px;color:var(--gray-400)">
+        Received {{ req.created_at.strftime('%d %b %Y, %I:%M %p') }}
+      </div>
+
+      <div class="req-card-footer">
+        {% if req.status == 'Pending' %}
+        <form method="POST" action="{{ url_for('update_request_status', req_id=req.id) }}">
+          <input type="hidden" name="status" value="Accepted" />
+          <button type="submit" class="btn btn-primary btn-sm">✓ Accept</button>
+        </form>
+        <form method="POST" action="{{ url_for('update_request_status', req_id=req.id) }}"
+          data-confirm="Reject this request from {{ req.learner_name }}?">
+          <input type="hidden" name="status" value="Rejected" />
+          <button type="submit" class="btn btn-danger-outline btn-sm">✕ Reject</button>
+        </form>
+        {% elif req.status == 'Accepted' %}
+        {% set has_session = req.id %}
+        <button class="btn btn-outline btn-sm" data-schedule-btn data-request-id="{{ req.id }}">
+          📅 Schedule Session
+        </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📩</div>
+      <h3>No incoming requests</h3>
+      <p>Add skills to your profile to start receiving learning requests.</p>
+      <a href="{{ url_for('skills') }}" class="btn btn-primary btn-sm" style="margin-top:1rem">+ Add Skills</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- SENT TAB -->
+<div class="tab-pane" id="sent">
+  <div class="card">
+    {% if sent %}
+    {% for req in sent %}
+    <div class="req-card">
+      <div class="req-card-header">
+        <div>
+          <span style="font-weight:700;color:var(--navy)">{{ req.skill_name }}</span>
+          <span style="color:var(--gray-400);margin:0 .4rem">·</span>
+          <span style="font-size:13.5px;color:var(--gray-600)">to
+            <a href="{{ url_for('public_profile', uid=req.provider_id) }}" style="font-weight:600">{{ req.provider_name
+              }}</a>
+            <span class="text-muted text-xs">({{ req.department }})</span>
+          </span>
+        </div>
+        <span class="badge badge-{{ req.status | lower }}">{{ req.status }}</span>
+      </div>
+
+      {% if req.message %}
+      <div class="req-card-body"
+        style="background:var(--gray-50);border-radius:8px;padding:.6rem .9rem;font-size:13.5px">
+        "{{ req.message }}"
+      </div>
+      {% endif %}
+
+      {% if req.preferred_time %}
+      <div style="font-size:13px;color:var(--gray-500)">⏰ Preferred time: {{ req.preferred_time }}</div>
+      {% endif %}
+
+      <div style="font-size:12px;color:var(--gray-400)">
+        Sent {{ req.created_at.strftime('%d %b %Y, %I:%M %p') }}
+      </div>
+
+      <div class="req-card-footer">
+        {% if req.status == 'Pending' %}
+        <form method="POST" action="{{ url_for('update_request_status', req_id=req.id) }}"
+          data-confirm="Cancel this request?">
+          <input type="hidden" name="status" value="Cancelled" />
+          <button type="submit" class="btn btn-danger-outline btn-sm">Cancel Request</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📤</div>
+      <h3>No sent requests</h3>
+      <p>Explore skills and send a request to a peer tutor.</p>
+      <a href="{{ url_for('explore') }}" class="btn btn-primary btn-sm" style="margin-top:1rem">Explore Skills</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Schedule Session Modal -->
+<div class="modal-backdrop" id="scheduleModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Schedule a Session</h3>
+      <button class="modal-close" onclick="closeModal('scheduleModal')">×</button>
+    </div>
+    <form method="POST" action="{{ url_for('schedule_session') }}" data-loading>
+      <div class="modal-body">
+        <input type="hidden" name="request_id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Session Date *</label>
+            <input class="form-control" type="date" name="session_date" required
+              min="{{ now.strftime('%Y-%m-%d') if now else '' }}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Start Time *</label>
+            <input class="form-control" type="time" name="start_time" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duration (minutes)</label>
+          <select class="form-control" name="duration_minutes">
+            <option value="30">30 minutes</option>
+            <option value="45">45 minutes</option>
+            <option value="60" selected>60 minutes (1 hr)</option>
+            <option value="90">90 minutes (1.5 hrs)</option>
+            <option value="120">120 minutes (2 hrs)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Meeting Details / Link</label>
+          <textarea class="form-control" name="meeting_details" rows="2"
+            placeholder="Google Meet link, location, or other details…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('scheduleModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">📅 Schedule Session</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+  // Pass today's date for min date attribute
+  document.querySelectorAll('[type="date"]').forEach(el => {
+    if (!el.value) el.min = new Date().toISOString().split('T')[0];
+  });
+</script>
+{% endblock %}
